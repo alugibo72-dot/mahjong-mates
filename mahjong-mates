@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Mahjong – Football Mates Italia</title>
+<link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Exo+2:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #FFD700;
+    --gold2: #f59e0b;
+    --dark: #060d1a;
+    --green: #16a34a;
+    --red: #dc2626;
+    --felt: #0a3d1f;
+    --felt2: #072e16;
+    --tile-w: 72px;
+    --tile-h: 72px;
+    --gap: 5px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: var(--dark);
+    font-family: 'Exo 2', sans-serif;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 12px 8px 40px;
+    background-image:
+      radial-gradient(ellipse at 15% 0%, rgba(22,163,74,0.18) 0%, transparent 45%),
+      radial-gradient(ellipse at 85% 0%, rgba(220,38,38,0.14) 0%, transparent 45%);
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  .header { text-align: center; margin-bottom: 8px; width: 100%; }
+  .brand {
+    font-family: 'Boogaloo', cursive;
+    font-size: clamp(1.6rem, 5.5vw, 2.8rem);
+    background: linear-gradient(135deg, var(--green), #fff 45%, var(--red));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.7));
+    line-height: 1.1;
+  }
+  .subtitle {
+    color: var(--gold); font-size: clamp(0.55rem, 1.8vw, 0.75rem);
+    letter-spacing: 3px; text-transform: uppercase; margin-top: 2px;
+  }
+
+  /* ── CREATOR BADGE ── */
+  .creator-badge {
+    display: flex; align-items: center; gap: 8px;
+    background: linear-gradient(135deg, rgba(133,77,14,0.4), rgba(69,26,3,0.6));
+    border: 1px solid rgba(255,215,0,0.4);
+    border-radius: 50px;
+    padding: 4px 12px 4px 4px;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 12px rgba(255,165,0,0.2);
+  }
+  .creator-badge img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; object-position: top; border: 2px solid var(--gold); }
+  .creator-text { display: flex; flex-direction: column; line-height: 1.2; }
+  .creator-text .made-by { font-size: 0.5rem; color: rgba(255,255,255,0.5); letter-spacing: 2px; text-transform: uppercase; }
+  .creator-text .creator-name { font-family: 'Boogaloo', cursive; font-size: 0.9rem; background: linear-gradient(90deg, var(--gold), #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .captain-c { background: var(--red); color: #fff; font-family: 'Boogaloo', cursive; font-size: 0.7rem; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+  /* ── AUDIO BAR ── */
+  .audio-bar {
+    display: flex; gap: 6px; align-items: center; margin-bottom: 8px;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 50px; padding: 5px 12px;
+  }
+  .audio-btn { background: none; border: none; cursor: pointer; font-size: 1.1rem; transition: transform 0.15s; padding: 2px 4px; }
+  .audio-btn:hover { transform: scale(1.2); }
+  .audio-label { font-size: 0.6rem; color: rgba(255,255,255,0.5); letter-spacing: 1px; text-transform: uppercase; }
+  .audio-sep { width: 1px; height: 14px; background: rgba(255,255,255,0.15); }
+
+  /* ── STATS ── */
+  .stats { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; justify-content: center; }
+  .stat-box { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 5px 14px; text-align: center; min-width: 70px; }
+  .stat-box .val { font-family: 'Boogaloo', cursive; font-size: 1.4rem; color: var(--gold); line-height: 1; }
+  .stat-box .lbl { font-size: 0.55rem; color: rgba(255,255,255,0.5); letter-spacing: 1px; text-transform: uppercase; }
+
+  /* ── BOARD ── */
+  .board-wrap {
+    background: radial-gradient(ellipse at center, #0d4f26 0%, var(--felt2) 100%);
+    border-radius: 18px;
+    padding: 12px;
+    border: 2px solid rgba(255,215,0,0.25);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05);
+    width: 100%;
+    max-width: 520px;
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .board {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: var(--gap);
+    width: 100%;
+  }
+
+  /* ── TILE ── */
+  .tile {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.15s, box-shadow 0.15s, opacity 0.3s;
+    user-select: none;
+    -webkit-user-select: none;
+    background: #1a2a3a;
+    border: 2px solid rgba(255,255,255,0.12);
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.5), 0 4px 8px rgba(0,0,0,0.4);
+    overflow: hidden;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .tile.locked {
+    cursor: not-allowed;
+    filter: brightness(0.5);
+  }
+  .tile.locked::after {
+    content: '🔒';
+    position: absolute;
+    inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: clamp(0.7rem, 2.5vw, 1rem);
+    background: rgba(0,0,0,0.5);
+  }
+  .tile:not(.locked):not(.removed):active { transform: scale(0.93); }
+  .tile.selected {
+    border-color: var(--gold) !important;
+    box-shadow: 0 0 0 2px var(--gold), 0 0 16px rgba(255,215,0,0.6) !important;
+    transform: scale(1.08) translateY(-3px);
+    z-index: 10;
+  }
+  .tile.removed {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.8);
+  }
+  .tile.wrong-flash {
+    animation: wrong-flash 0.5s ease;
+  }
+  @keyframes wrong-flash {
+    0%,100% { border-color: rgba(255,255,255,0.12); }
+    25%,75% { border-color: var(--red); box-shadow: 0 0 12px rgba(220,38,38,0.8); }
+  }
+  .tile.match-flash {
+    animation: match-flash 0.4s ease;
+  }
+  @keyframes match-flash {
+    0%,100% { transform: scale(1.08) translateY(-3px); }
+    50% { transform: scale(1.18) translateY(-5px); }
+  }
+
+  /* Tile back (face-down) */
+  .tile .tile-back {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    padding: 3px;
+  }
+  .tile .tile-back img { width: 100%; height: 100%; object-fit: contain; border-radius: 5px; }
+
+  /* Tile front (face-up) */
+  .tile .tile-front {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 3px;
+    background: #0d1e2e;
+  }
+  .tile .tile-front img { width: 82%; height: 72%; object-fit: contain; }
+  .tile .tile-front .tile-name {
+    font-family: 'Boogaloo', cursive;
+    font-size: clamp(0.32rem, 1.2vw, 0.55rem);
+    color: #fff; text-align: center;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+    line-height: 1.1; margin-top: 1px;
+    padding: 0 2px;
+  }
+
+  /* ── HINT OVERLAY ── */
+  .tile.hint-glow {
+    animation: hint-pulse 0.8s ease infinite alternate;
+  }
+  @keyframes hint-pulse {
+    from { box-shadow: 0 0 6px rgba(255,215,0,0.4); border-color: rgba(255,215,0,0.5); }
+    to   { box-shadow: 0 0 18px rgba(255,215,0,0.9); border-color: var(--gold); }
+  }
+
+  /* ── BUTTONS ── */
+  .controls { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; width: 100%; max-width: 520px; }
+  .btn {
+    flex: 1; min-width: 90px; padding: 10px 14px;
+    border-radius: 12px; border: none; font-family: 'Exo 2', sans-serif;
+    font-size: 0.82rem; font-weight: 900; cursor: pointer;
+    transition: transform 0.12s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(0); }
+  .btn-new { background: linear-gradient(135deg, var(--gold), var(--gold2)); color: #000; box-shadow: 0 4px 14px rgba(255,165,0,0.4); }
+  .btn-hint { background: linear-gradient(135deg, #2563eb, #1e3a8a); color: #fff; box-shadow: 0 4px 14px rgba(37,99,235,0.4); }
+  .btn-shuffle { background: linear-gradient(135deg, #7c3aed, #3b0764); color: #fff; box-shadow: 0 4px 14px rgba(124,58,237,0.4); }
+
+  /* ── WIN / LOSE OVERLAY ── */
+  .overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.88); z-index: 200;
+    align-items: center; justify-content: center;
+    flex-direction: column; text-align: center; padding: 20px;
+  }
+  .overlay.show { display: flex; animation: fade-in 0.4s ease; }
+  @keyframes fade-in { from { opacity:0; } to { opacity:1; } }
+  .overlay .ov-logo { width: 100px; margin-bottom: 10px; }
+  .overlay h2 {
+    font-family: 'Boogaloo', cursive; font-size: clamp(2rem, 9vw, 3.5rem);
+    background: linear-gradient(90deg, var(--gold), #fff, var(--gold));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; filter: drop-shadow(0 0 20px rgba(255,215,0,0.7));
+    margin-bottom: 8px;
+  }
+  .overlay p { color: #fff; font-size: 0.95rem; opacity: 0.85; margin-bottom: 6px; }
+  .overlay .ov-stats { color: var(--gold); font-size: 1rem; font-weight: 700; margin-bottom: 14px; }
+  .overlay .ov-creator { font-size: 0.65rem; color: rgba(255,255,255,0.35); letter-spacing: 1px; margin-bottom: 14px; }
+  .overlay .ov-creator span { color: var(--gold); }
+  .btn-again { background: linear-gradient(135deg, var(--green), #14532d); color: #fff; padding: 13px 30px; border-radius: 14px; border: none; font-family: 'Boogaloo', cursive; font-size: 1.2rem; cursor: pointer; box-shadow: 0 4px 20px rgba(22,163,74,0.5); transition: transform 0.12s; }
+  .btn-again:hover { transform: scale(1.05); }
+
+  /* ── TOAST ── */
+  .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px); padding: 9px 22px; border-radius: 50px; font-family: 'Boogaloo', cursive; font-size: 1.1rem; opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s; z-index: 300; white-space: nowrap; }
+  .toast.ok  { background: var(--green); color: #fff; box-shadow: 0 4px 20px rgba(22,163,74,0.6); }
+  .toast.err { background: var(--red);   color: #fff; box-shadow: 0 4px 20px rgba(220,38,38,0.6); }
+  .toast.info{ background: #1d4ed8;      color: #fff; box-shadow: 0 4px 20px rgba(29,78,216,0.6); }
+  .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ── FOOTER ── */
+  .footer { margin-top: 16px; text-align: center; color: rgba(255,255,255,0.2); font-size: 0.62rem; letter-spacing: 1px; }
+  .footer span { color: var(--gold); opacity: 0.5; }
+
+  /* Mobile fine-tuning */
+  @media (max-width: 380px) {
+    :root { --gap: 4px; }
+    .board-wrap { padding: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="brand">Football Mates</div>
+  <div class="subtitle">⚽ Mahjong · Italia Community ⚽</div>
+</div>
+
+<div class="creator-badge">
+  <img id="giboImg" src="" alt="GIBO">
+  <div class="creator-text">
+    <span class="made-by">Creato da</span>
+    <span class="creator-name">GIBO ⭐</span>
+  </div>
+  <div class="captain-c">C</div>
+</div>
+
+<div class="audio-bar">
+  <span class="audio-label">Stadio</span>
+  <button class="audio-btn" id="btnStadium" onclick="toggleStadium()">🏟️</button>
+  <div class="audio-sep"></div>
+  <span class="audio-label">Voce</span>
+  <button class="audio-btn" id="btnVoice" onclick="toggleVoice()">🗣️</button>
+</div>
+
+<div class="stats">
+  <div class="stat-box"><div class="val" id="scoreVal">0</div><div class="lbl">Punti</div></div>
+  <div class="stat-box"><div class="val" id="pairsVal">0/18</div><div class="lbl">Coppie</div></div>
+  <div class="stat-box"><div class="val" id="timeVal">0s</div><div class="lbl">Tempo</div></div>
+  <div class="stat-box"><div class="val" id="hintsVal">3</div><div class="lbl">Sugger.</div></div>
+</div>
+
+<div class="board-wrap">
+  <div class="board" id="board"></div>
+</div>
+
+<div class="controls">
+  <button class="btn btn-new" onclick="newGame()">🔀 Nuova</button>
+  <button class="btn btn-hint" onclick="showHint()">💡 Suggerisci</button>
+  <button class="btn btn-shuffle" onclick="shuffleBoard()">🔄 Rimescola</button>
+</div>
+
+<div class="footer">Football Mates Italia · <span>Creato da GIBO ⭐</span></div>
+
+<div class="toast" id="toast"></div>
+
+<!-- WIN OVERLAY -->
+<div class="overlay" id="winOverlay">
+  <img class="ov-logo" id="winLogo" src="" alt="Football Mates Italia">
+  <h2>🏆 VITTORIA! 🏆</h2>
+  <p>Hai abbinato tutte le tessere!</p>
+  <div class="ov-stats" id="winStats"></div>
+  <div class="ov-creator">Gioco creato da <span>GIBO ⭐</span> per Football Mates Italia</div>
+  <button class="btn-again" onclick="newGame();closeOverlay('winOverlay')">⚽ Gioca ancora</button>
+</div>
+
+<!-- LOSE OVERLAY -->
+<div class="overlay" id="loseOverlay">
+  <img class="ov-logo" id="loseLogo" src="" alt="Football Mates Italia">
+  <h2>😔 BLOCCATO!</h2>
+  <p>Nessuna mossa disponibile.</p>
+  <div class="ov-stats" id="loseStats"></div>
+  <div class="ov-creator">Gioco creato da <span>GIBO ⭐</span> per Football Mates Italia</div>
+  <button class="btn-again" onclick="newGame();closeOverlay('loseOverlay')">🔀 Riprova</button>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  TILE & IMAGE DATA
+// ═══════════════════════════════════════════════
+const TILE_TYPES = [
+  { id: "DevilsSGE", src: "data:image/jpeg;base64,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
